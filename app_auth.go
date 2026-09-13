@@ -375,7 +375,7 @@ func (a *App) StartQRLogin() map[string]interface{} {
 
 		api := a.getAPI()
 		if api == nil {
-			runtime.EventsEmit(a.ctx, "auth_error", "Koneksi tidak siap. Silakan klik Reset Sesi atau coba lagi.")
+			a.emitEvent( "auth_error", "Koneksi tidak siap. Silakan klik Reset Sesi atau coba lagi.")
 			return
 		}
 
@@ -390,12 +390,12 @@ func (a *App) StartQRLogin() map[string]interface{} {
 		authRes, err := q.Auth(qrCtx, loggedIn, func(ctx context.Context, token qrlogin.Token) error {
 			pngBytes, qrErr := qrcode.Encode(token.URL(), qrcode.Medium, 256)
 			if qrErr != nil {
-				runtime.EventsEmit(a.ctx, "auth_error", "Gagal menghasilkan QR Code internal: "+qrErr.Error())
+				a.emitEvent( "auth_error", "Gagal menghasilkan QR Code internal: "+qrErr.Error())
 				return qrErr
 			}
 			base64Img := "data:image/png;base64," + base64.StdEncoding.EncodeToString(pngBytes)
 
-			runtime.EventsEmit(a.ctx, "qr_token", map[string]interface{}{
+			a.emitEvent( "qr_token", map[string]interface{}{
 				"url":     base64Img,
 				"expires": token.Expires().Unix(),
 			})
@@ -413,15 +413,15 @@ func (a *App) StartQRLogin() map[string]interface{} {
 				strings.Contains(strings.ToLower(errStr), "2fa required") ||
 				strings.Contains(strings.ToLower(errStr), "password auth needed") ||
 				strings.Contains(strings.ToLower(errStr), "password") {
-				runtime.EventsEmit(a.ctx, "auth_password_required")
+				a.emitEvent( "auth_password_required")
 				return
 			}
-			runtime.EventsEmit(a.ctx, "auth_error", translateTelegramError(errStr))
+			a.emitEvent( "auth_error", translateTelegramError(errStr))
 			return
 		}
 
 		if authRes != nil {
-			runtime.EventsEmit(a.ctx, "auth_success")
+			a.emitEvent( "auth_success")
 		}
 	}()
 

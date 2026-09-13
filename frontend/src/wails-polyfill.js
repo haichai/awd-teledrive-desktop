@@ -50,8 +50,41 @@ if (!window['go']) {
               console.warn('Wails Web Proxy API call fallback error for ' + methodName + ':', e);
             }
 
+            // ---- Offline fallback: only reached when the Go backend could not
+            // be reached (Vite dev server without proxy, or server not running).
+            // API credentials are kept in localStorage so the login form stays
+            // usable; the real Telegram handshake still needs the Go backend.
+            if (methodName === 'SetAPICredentials') {
+              const [apiId, apiHash] = args;
+              if (!apiId || !apiHash) {
+                return { success: false, error: 'API ID and API Hash cannot be empty' };
+              }
+              localStorage.setItem('teledrive_api_id', String(apiId));
+              localStorage.setItem('teledrive_api_hash', String(apiHash));
+              return {
+                success: true,
+                warning: 'Backend tidak terjangkau - kredensial hanya disimpan di browser. Jalankan server Go untuk melanjutkan login Telegram.'
+              };
+            }
+
+            if (methodName === 'GetAPICredentials') {
+              return {
+                api_id: localStorage.getItem('teledrive_api_id') || '',
+                api_hash: localStorage.getItem('teledrive_api_hash') || ''
+              };
+            }
+
             if (methodName === 'CheckAuth') return false;
             if (methodName.startsWith('GetSettings') || methodName.startsWith('GetUserInfo')) return {};
+            // Methods that report success/failure must never fall back to []:
+            // `([]).success` is undefined, which surfaces as a misleading
+            // "operation failed" message instead of the real cause.
+            if (typeof prop === 'string' && /^(Set|Save|Start|Send|Login|Delete|Remove|Create|Update|Cancel|Toggle|Enable|Disable|Add|Apply|Close|Open|Mount|Unmount|Backup|Restore)/.test(prop)) {
+              return {
+                success: false,
+                error: 'Backend tidak tersedia. Pastikan server Go berjalan (go run . -server) atau aktifkan proxy /api di vite.config.js.'
+              };
+            }
             return [];
           };
         }

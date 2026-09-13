@@ -190,7 +190,7 @@ func (a *App) StartAutoBackup(folderPath string, destChatId string) map[string]i
 						size = fi.Size()
 					}
 
-					runtime.EventsEmit(a.ctx, "sync:activity", map[string]interface{}{
+					a.emitEvent( "sync:activity", map[string]interface{}{
 						"name":   fileName,
 						"size":   size,
 						"status": "uploading",
@@ -207,7 +207,7 @@ func (a *App) StartAutoBackup(folderPath string, destChatId string) map[string]i
 						}
 					}
 
-					runtime.EventsEmit(a.ctx, "sync:activity", map[string]interface{}{
+					a.emitEvent( "sync:activity", map[string]interface{}{
 						"name":   fileName,
 						"size":   size,
 						"status": status,
@@ -237,7 +237,7 @@ func (a *App) StartAutoBackup(folderPath string, destChatId string) map[string]i
 						if localMap[name] {
 							continue
 						}
-						runtime.EventsEmit(a.ctx, "sync:activity", map[string]interface{}{
+						a.emitEvent( "sync:activity", map[string]interface{}{
 							"name":   name,
 							"size":   driveItem.Size,
 							"status": "uploading",
@@ -250,7 +250,7 @@ func (a *App) StartAutoBackup(folderPath string, destChatId string) map[string]i
 						if err != nil {
 							status = "failed"
 						}
-						runtime.EventsEmit(a.ctx, "sync:activity", map[string]interface{}{
+						a.emitEvent( "sync:activity", map[string]interface{}{
 							"name":   name,
 							"size":   driveItem.Size,
 							"status": status,

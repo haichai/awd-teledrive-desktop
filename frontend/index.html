@@ -51,8 +51,35 @@
                   } catch (e) {
                     console.warn('Wails Web Proxy API call fallback error for ' + methodName + ':', e);
                   }
+
+                  // ---- Offline fallback for when Go backend is not reachable ----
+                  if (methodName === 'SetAPICredentials') {
+                    const [apiId, apiHash] = args;
+                    if (!apiId || !apiHash) {
+                      return { success: false, error: 'API ID and API Hash cannot be empty' };
+                    }
+                    localStorage.setItem('teledrive_api_id', String(apiId));
+                    localStorage.setItem('teledrive_api_hash', String(apiHash));
+                    return {
+                      success: true,
+                      warning: 'Backend tidak terjangkau - kredensial hanya disimpan di browser. Jalankan server Go untuk melanjutkan login Telegram.'
+                    };
+                  }
+                  if (methodName === 'GetAPICredentials') {
+                    return {
+                      api_id: localStorage.getItem('teledrive_api_id') || '',
+                      api_hash: localStorage.getItem('teledrive_api_hash') || ''
+                    };
+                  }
                   if (methodName === 'CheckAuth') return false;
                   if (methodName.startsWith('GetSettings') || methodName.startsWith('GetUserInfo')) return {};
+                  // Prevent misleading generic fail errors - return explicit backend missing error
+                  if (/^(Set|Save|Start|Send|Login|Delete|Remove|Create|Update|Cancel|Toggle|Enable|Disable|Add|Apply|Close|Open|Mount|Unmount|Backup|Restore)/.test(methodName)) {
+                    return {
+                      success: false,
+                      error: 'Backend tidak tersedia. Pastikan server Go berjalan (go run . -server) atau aktifkan proxy /api di vite.config.js.'
+                    };
+                  }
                   return [];
                 };
               }

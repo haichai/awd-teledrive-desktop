@@ -1083,7 +1083,7 @@ func (a *App) UploadMultipleFiles(filePaths []string, currentPath string) map[st
 
 	for i, fp := range filePaths {
 		fileName := filepath.Base(fp)
-		runtime.EventsEmit(a.ctx, "multi:progress", map[string]interface{}{
+		a.emitEvent( "multi:progress", map[string]interface{}{
 			"current":  i + 1,
 			"total":    total,
 			"fileName": fileName,
@@ -1097,7 +1097,7 @@ func (a *App) UploadMultipleFiles(filePaths []string, currentPath string) map[st
 			failCount++
 		}
 
-		runtime.EventsEmit(a.ctx, "multi:progress", map[string]interface{}{
+		a.emitEvent( "multi:progress", map[string]interface{}{
 			"current":  i + 1,
 			"total":    total,
 			"fileName": fileName,
@@ -1190,7 +1190,7 @@ func (a *App) UploadFile(filePath string, currentPath string) map[string]interfa
 					if total > 0 {
 						pct = float64(done) / float64(total) * 100
 					}
-					runtime.EventsEmit(a.ctx, "transfer:progress", ProgressEvent{
+					a.emitEvent( "transfer:progress", ProgressEvent{
 						FileName: fileName, Percent: pct,
 					})
 				},
@@ -1245,7 +1245,7 @@ func (a *App) UploadFile(filePath string, currentPath string) map[string]interfa
 			if total > 0 {
 				pct = float64(done) / float64(total) * 100
 			}
-			runtime.EventsEmit(a.ctx, "transfer:progress", ProgressEvent{
+			a.emitEvent( "transfer:progress", ProgressEvent{
 				FileName: fileName, Percent: pct,
 			})
 		},
@@ -1511,7 +1511,7 @@ func (a *App) DownloadFile(currentPath string, fileID string, fileName string, f
 						if total > 0 {
 							pct = float64(done) / float64(total) * 100
 						}
-						runtime.EventsEmit(a.ctx, "transfer:progress", ProgressEvent{
+						a.emitEvent( "transfer:progress", ProgressEvent{
 							FileName: fileName, Percent: pct,
 						})
 					},
@@ -1568,7 +1568,7 @@ func (a *App) DownloadFile(currentPath string, fileID string, fileName string, f
 			if total > 0 {
 				pct = float64(done) / float64(total) * 100
 			}
-			runtime.EventsEmit(a.ctx, "transfer:progress", ProgressEvent{
+			a.emitEvent( "transfer:progress", ProgressEvent{
 				FileName: fileName, Percent: pct,
 			})
 		},
@@ -1679,7 +1679,7 @@ func (a *App) DownloadFolder(folderChatId string, folderName string) map[string]
 				if total > 0 {
 					pct = float64(done) / float64(total) * 100
 				}
-				runtime.EventsEmit(a.ctx, "transfer:progress", ProgressEvent{
+				a.emitEvent( "transfer:progress", ProgressEvent{
 					FileName: fmt.Sprintf("Zipping %d/%d: %s", i+1, totalFiles, name),
 					Percent:  pct,
 				})
@@ -2315,7 +2315,7 @@ func (a *App) downloadFileDirect(currentPath string, fileID string, fileName str
 			if total > 0 {
 				pct = float64(done) / float64(total) * 100
 			}
-			runtime.EventsEmit(a.ctx, "transfer:progress", ProgressEvent{
+			a.emitEvent( "transfer:progress", ProgressEvent{
 				FileName: fileName, Percent: pct,
 			})
 		},
@@ -2377,7 +2377,7 @@ func (a *App) ClearRecentFiles() map[string]interface{} {
 }
 
 func (a *App) ShowNotification(title string, message string) {
-	runtime.EventsEmit(a.ctx, "notification", map[string]interface{}{
+	a.emitEvent( "notification", map[string]interface{}{
 		"title":   title,
 		"message": message,
 	})
@@ -2519,7 +2519,7 @@ func (a *App) RenameFile(chatIdStr string, fileIdStr string, newName string) map
 		return map[string]interface{}{"success": false, "error": "file not found: " + err.Error()}
 	}
 
-	runtime.EventsEmit(a.ctx, "rename:progress", map[string]interface{}{
+	a.emitEvent( "rename:progress", map[string]interface{}{
 		"fileName": newName,
 		"status":   "downloading",
 		"percent":  float64(0),
@@ -2539,7 +2539,7 @@ func (a *App) RenameFile(chatIdStr string, fileIdStr string, newName string) map
 		return map[string]interface{}{"success": false, "error": "download failed: " + err.Error()}
 	}
 
-	runtime.EventsEmit(a.ctx, "rename:progress", map[string]interface{}{
+	a.emitEvent( "rename:progress", map[string]interface{}{
 		"fileName": newName,
 		"status":   "uploading",
 		"percent":  float64(50),
@@ -2564,7 +2564,7 @@ func (a *App) RenameFile(chatIdStr string, fileIdStr string, newName string) map
 			if total > 0 {
 				pct = 50 + float64(done)/float64(total)*50
 			}
-			runtime.EventsEmit(a.ctx, "rename:progress", map[string]interface{}{
+			a.emitEvent( "rename:progress", map[string]interface{}{
 				"fileName": newName,
 				"status":   "uploading",
 				"percent":  pct,
@@ -2615,7 +2615,7 @@ func (a *App) RenameFile(chatIdStr string, fileIdStr string, newName string) map
 		})
 	}
 
-	runtime.EventsEmit(a.ctx, "rename:progress", map[string]interface{}{
+	a.emitEvent( "rename:progress", map[string]interface{}{
 		"fileName": newName,
 		"status":   "done",
 		"percent":  float64(100),

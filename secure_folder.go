@@ -812,7 +812,7 @@ func (a *App) UploadSecureFolderFile(chatIdStr string, localFilePath string, pas
 	peer := a.getInputPeer(chatIdStr)
 	u := uploader.NewUploader(api).WithThreads(4)
 
-	runtime.EventsEmit(a.ctx, "transfer:progress", ProgressEvent{
+	a.emitEvent( "transfer:progress", ProgressEvent{
 		FileName: encFileName, Percent: 10,
 	})
 
@@ -845,7 +845,7 @@ func (a *App) UploadSecureFolderFile(chatIdStr string, localFilePath string, pas
 		return map[string]interface{}{"success": false, "error": "failed to extract message ID after upload"}
 	}
 
-	runtime.EventsEmit(a.ctx, "transfer:progress", ProgressEvent{
+	a.emitEvent( "transfer:progress", ProgressEvent{
 		FileName: encFileName, Percent: 80,
 	})
 
@@ -915,7 +915,7 @@ func (a *App) UploadSecureFolderFile(chatIdStr string, localFilePath string, pas
 		})
 	}
 
-	runtime.EventsEmit(a.ctx, "transfer:progress", ProgressEvent{
+	a.emitEvent( "transfer:progress", ProgressEvent{
 		FileName: encFileName, Percent: 100,
 	})
 
@@ -933,7 +933,7 @@ func (a *App) UploadMultipleSecureFolderFiles(chatIdStr string, filePaths []stri
 
 	for i, fp := range filePaths {
 		fileName := filepath.Base(fp)
-		runtime.EventsEmit(a.ctx, "multi:progress", map[string]interface{}{
+		a.emitEvent( "multi:progress", map[string]interface{}{
 			"current":  i + 1,
 			"total":    total,
 			"fileName": fileName,
@@ -1030,7 +1030,7 @@ func (a *App) DownloadSecureFolderFile(chatIdStr string, messageIdStr string, fi
 		return map[string]interface{}{"success": false, "error": "not connected"}
 	}
 
-	runtime.EventsEmit(a.ctx, "transfer:progress", ProgressEvent{
+	a.emitEvent( "transfer:progress", ProgressEvent{
 		FileName: fileName, Percent: 0,
 	})
 
@@ -1047,7 +1047,7 @@ func (a *App) DownloadSecureFolderFile(chatIdStr string, messageIdStr string, fi
 	if _, err := os.Stat(cachedPath); err == nil {
 		err = copyFile(cachedPath, savePath)
 		if err == nil {
-			runtime.EventsEmit(a.ctx, "transfer:progress", ProgressEvent{
+			a.emitEvent( "transfer:progress", ProgressEvent{
 				FileName: fileName, Percent: 100,
 			})
 			return map[string]interface{}{"success": true, "filePath": savePath}
@@ -1077,7 +1077,7 @@ func (a *App) DownloadSecureFolderFile(chatIdStr string, messageIdStr string, fi
 			if total > 0 {
 				pct = float64(done) / float64(total) * 90
 			}
-			runtime.EventsEmit(a.ctx, "transfer:progress", ProgressEvent{
+			a.emitEvent( "transfer:progress", ProgressEvent{
 				FileName: fileName, Percent: pct,
 			})
 		},
@@ -1115,7 +1115,7 @@ func (a *App) DownloadSecureFolderFile(chatIdStr string, messageIdStr string, fi
 
 	_ = os.WriteFile(cachedPath, finalData, 0644)
 
-	runtime.EventsEmit(a.ctx, "transfer:progress", ProgressEvent{
+	a.emitEvent( "transfer:progress", ProgressEvent{
 		FileName: fileName, Percent: 100,
 	})
 

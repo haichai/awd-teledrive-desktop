@@ -254,5 +254,5 @@ func (a *App) emitEvent(eventName string, data ...interface{}) {
 	defer func() {
 		_ = recover()
 	}()
-	runtime.EventsEmit(a.ctx, eventName, data...)
+	a.emitEvent( eventName, data...)
 }

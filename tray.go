@@ -182,11 +182,11 @@ func (a *App) runTrayLoop() {
 				a.ShowWindow()
 			case ID_TRAY_ABOUT:
 				a.ShowWindow()
-				runtime.EventsEmit(a.ctx, "menu:navigate", "changelog")
+				a.emitEvent( "menu:navigate", "changelog")
 			case ID_TRAY_CHECK_UPDATE:
 				a.ShowWindow()
-				runtime.EventsEmit(a.ctx, "menu:navigate", "changelog")
-				runtime.EventsEmit(a.ctx, "menu:check-updates")
+				a.emitEvent( "menu:navigate", "changelog")
+				a.emitEvent( "menu:check-updates")
 			case ID_TRAY_QUIT:
 				shellNotifyIcon(NIM_DELETE, &trayNID)
 				procPostQuitMessage.Call(0)
